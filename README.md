@@ -169,10 +169,10 @@ http://localhost:5000/products/category/Electronics
 
 # ☁ Deployed API (Render)
 
-
+https://node-js-assignment-2-9jy6.onrender.com
 
 ---
 
 # 📬 Postman Documentation
 
-
+https://documenter.getpostman.com/view/50841281/2sBXcGEzg5

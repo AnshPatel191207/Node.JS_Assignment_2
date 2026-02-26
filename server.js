@@ -3,11 +3,9 @@ const cors = require("cors");
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// In-memory product data
 let products = [
   { id: 1, name: "Wireless Mouse", category: "Electronics", price: 799, stock: 25, rating: 4.3 },
   { id: 2, name: "Running Shoes", category: "Footwear", price: 2499, stock: 40, rating: 4.5 },
@@ -16,50 +14,45 @@ let products = [
   { id: 5, name: "Backpack", category: "Fashion", price: 1599, stock: 50, rating: 4.1 }
 ];
 
-// Test route
 app.get("/", (req, res) => {
   res.send("E-Commerce Product API Running 🚀");
 });
 
-
-// =====================
-// 🔹 GET ROUTES
-// =====================
-
-// 1. Get all products
 app.get("/products", (req, res) => {
   res.status(200).json(products);
 });
 
-// 2. Get product by ID
 app.get("/products/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  const product = products.find(p => p.id === id);
+  let foundProduct = null;
 
-  if (!product) {
+  for (let i = 0; i < products.length; i++) {
+    if (products[i].id === id) {
+      foundProduct = products[i];
+      break;
+    }
+  }
+
+  if (!foundProduct) {
     return res.status(404).json({ message: "Product not found" });
   }
 
-  res.status(200).json(product);
+  res.status(200).json(foundProduct);
 });
 
-// 3. Get products by category
 app.get("/products/category/:categoryName", (req, res) => {
   const category = req.params.categoryName.toLowerCase();
+  let filteredProducts = [];
 
-  const filtered = products.filter(
-    p => p.category.toLowerCase() === category
-  );
+  for (let i = 0; i < products.length; i++) {
+    if (products[i].category.toLowerCase() === category) {
+      filteredProducts.push(products[i]);
+    }
+  }
 
-  res.status(200).json(filtered);
+  res.status(200).json(filteredProducts);
 });
 
-
-// =====================
-// 🔹 POST ROUTE
-// =====================
-
-// 4. Add new product
 app.post("/products", (req, res) => {
   const { name, category, price, stock, rating } = req.body;
 
@@ -73,70 +66,73 @@ app.post("/products", (req, res) => {
   };
 
   products.push(newProduct);
-
   res.status(201).json(newProduct);
 });
 
-
-// =====================
-// 🔹 PUT ROUTES
-// =====================
-
-// 5. Replace entire product
 app.put("/products/:id", (req, res) => {
   const id = parseInt(req.params.id);
-  const index = products.findIndex(p => p.id === id);
+  let found = false;
 
-  if (index === -1) {
-    return res.status(404).json({ message: "Product not found" });
+  for (let i = 0; i < products.length; i++) {
+    if (products[i].id === id) {
+      const { name, category, price, stock, rating } = req.body;
+
+      products[i] = {
+        id: id,
+        name,
+        category,
+        price,
+        stock,
+        rating
+      };
+
+      found = true;
+      res.status(200).json(products[i]);
+      break;
+    }
   }
 
-  const { name, category, price, stock, rating } = req.body;
-
-  products[index] = {
-    id: id,
-    name,
-    category,
-    price,
-    stock,
-    rating
-  };
-
-  res.status(200).json(products[index]);
+  if (!found) {
+    return res.status(404).json({ message: "Product not found" });
+  }
 });
 
-
-// 6. Update only stock
 app.put("/products/:id/stock", (req, res) => {
   const id = parseInt(req.params.id);
-  const product = products.find(p => p.id === id);
+  let found = false;
 
-  if (!product) {
-    return res.status(404).json({ message: "Product not found" });
+  for (let i = 0; i < products.length; i++) {
+    if (products[i].id === id) {
+      products[i].stock = req.body.stock;
+      found = true;
+      res.status(200).json(products[i]);
+      break;
+    }
   }
 
-  product.stock = req.body.stock;
-
-  res.status(200).json(product);
+  if (!found) {
+    return res.status(404).json({ message: "Product not found" });
+  }
 });
 
-
-// 7. Update only price
 app.put("/products/:id/price", (req, res) => {
   const id = parseInt(req.params.id);
-  const product = products.find(p => p.id === id);
+  let found = false;
 
-  if (!product) {
-    return res.status(404).json({ message: "Product not found" });
+  for (let i = 0; i < products.length; i++) {
+    if (products[i].id === id) {
+      products[i].price = req.body.price;
+      found = true;
+      res.status(200).json(products[i]);
+      break;
+    }
   }
 
-  product.price = req.body.price;
-
-  res.status(200).json(product);
+  if (!found) {
+    return res.status(404).json({ message: "Product not found" });
+  }
 });
 
-
-// Start server
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
